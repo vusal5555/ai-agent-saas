@@ -9,9 +9,17 @@ const fetchTranscript = tool({
   }),
   execute: async ({ videoId }) => {
     const transcript = await getYoutubeTranscript(videoId);
+
+    if (!transcript) {
+      return {
+        transcript: [],
+        cache: false,
+      };
+    }
+
     return {
-      cache: transcript.cache,
       transcript: transcript.transcript,
+      cache: transcript.cache,
     };
   },
 });

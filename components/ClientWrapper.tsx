@@ -1,6 +1,5 @@
 "use client";
 
-import { ClerkProvider } from "@clerk/nextjs";
 import { SchematicProvider } from "@schematichq/schematic-react";
 import React from "react";
 import SchematicWrapped from "./SchematicWrapped";

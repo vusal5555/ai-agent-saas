@@ -5,13 +5,35 @@ import YoutubeVideoDetails from "@/components/YoutubeVideoDetails";
 import ThumbnailGeneration from "@/components/ThumbnailGeneration";
 import { FeatureFlag } from "@/features/flags";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TitleGeneration from "@/components/TitleGeneration";
 import Transcription from "@/components/TranscriptGeneration";
 import AIagentChat from "@/components/AIagentChat";
-
+import { Doc } from "@/convex/_generated/dataModel";
+import { useUser } from "@clerk/nextjs";
+import { createOrGetVideo } from "@/actions/createOrGetVideo";
 const VideoAnalysisPage = () => {
   const params = useParams<{ videoId: string }>();
+
+  const { user } = useUser();
+
+  const [video, setVideo] = useState<Doc<"videos"> | null | undefined>(
+    undefined
+  );
+
+  // useEffect(() => {
+  //   const fetchVideo = async () => {
+  //     const response = await createOrGetVideo(params.videoId);
+
+  //     if (!response.success) {
+  //       console.log(response.error);
+  //     } else {
+  //       setVideo(response.video);
+  //     }
+  //   };
+
+  //   fetchVideo();
+  // }, [user, params.videoId]);
 
   const { videoId } = params;
   return (

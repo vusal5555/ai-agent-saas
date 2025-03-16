@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// /video/jfhdsljhfk/analysis protected page
 const isProtectedRoute = createRouteMatcher(["/video(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {

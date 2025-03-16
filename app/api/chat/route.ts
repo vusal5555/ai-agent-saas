@@ -1,29 +1,19 @@
-import { getVideoDetails } from "@/actions/getVideoDetails";
-import fetchTranscript from "@/tools/fetchTranscript";
-
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { currentUser } from "@clerk/nextjs/server";
-import { streamText } from "ai";
-import { NextResponse } from "next/server";
+import { streamText, tool } from "ai";
+import fetchTranscript from "@/tools/fetchTranscript";
+import { getVideoDetails } from "@/actions/getVideoDetails";
 
 const anthropic = createAnthropic({
   apiKey: process.env.CLAUDE_API_KEY,
-  headers: {
-    "anthropic-beta": "token-efficient-tools-2025-02-19",
-  },
+  // headers: {
+  //   "anthropic-beta": "token-efficient-tools-2025-02-19",
+  // },
 });
 
 const model = anthropic("claude-3-7-sonnet-20250219");
 
 export async function POST(req: Request) {
   const { messages, videoId } = await req.json();
-  const user = await currentUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  console.log(user);
 
   const videoDetails = await getVideoDetails(videoId);
 
@@ -33,7 +23,7 @@ export async function POST(req: Request) {
     model,
     messages: [{ role: "system", content: systemMessage }, ...messages],
     tools: {
-      fetchTranscript: fetchTranscript,
+      fetchTranscript,
     },
   });
 

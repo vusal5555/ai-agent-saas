@@ -8,7 +8,7 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_video_id", ["videoId"])
-    .index("by_user_and_video_id", ["userId", "videoId"]),
+    .index("by_user_and_video", ["userId", "videoId"]),
 
   transcript: defineTable({
     videoId: v.string(),
@@ -22,7 +22,7 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_video_id", ["videoId"])
-    .index("by_user_and_video_id", ["userId", "videoId"]),
+    .index("by_user_and_video", ["userId", "videoId"]),
 
   images: defineTable({
     storgaId: v.id("_storage"),
