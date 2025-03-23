@@ -1,9 +1,9 @@
-import { ConvexReactClient } from "convex/react";
+import { ConvexHttpClient } from "convex/browser";
 
 export const getConvexClient = () => {
   if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
     throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
   }
 
-  return new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 };

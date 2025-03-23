@@ -1,29 +1,25 @@
 "use client";
 
 import { SchematicProvider } from "@schematichq/schematic-react";
-import React from "react";
 import SchematicWrapped from "./SchematicWrapped";
-import ConvexClientProvider from "./ConvexClientProvider";
+import { ConvexClientProvider } from "./ConvexClientProvider";
 
-type Props = {
+export default function ClientWrapper({
+  children,
+}: Readonly<{
   children: React.ReactNode;
-};
-
-const ClientWrapper = (props: Props) => {
-  const schematicPublishableKey =
-    process.env.NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY;
-
-  if (!schematicPublishableKey) {
-    throw new Error("NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY is not set");
+}>) {
+  const schematicPubKey = process.env.NEXT_PUBLIC_SCHEMATIC_PUBLISHABLE_KEY;
+  if (!schematicPubKey) {
+    throw new Error(
+      "No Schematic Publishable Key found. Please add it to your .env.local file."
+    );
   }
-
   return (
     <ConvexClientProvider>
-      <SchematicProvider publishableKey={schematicPublishableKey}>
-        <SchematicWrapped>{props.children}</SchematicWrapped>
+      <SchematicProvider publishableKey={schematicPubKey}>
+        <SchematicWrapped>{children}</SchematicWrapped>
       </SchematicProvider>
     </ConvexClientProvider>
   );
-};
-
-export default ClientWrapper;
+}

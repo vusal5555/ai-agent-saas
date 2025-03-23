@@ -12,3 +12,17 @@ export const getVideoById = query({
       .unique();
   },
 });
+
+export const createVideoEntry = mutation({
+  args: {
+    videoId: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const videoId = await ctx.db.insert("videos", {
+      videoId: args.videoId,
+      userId: args.userId,
+    });
+    return videoId;
+  },
+});

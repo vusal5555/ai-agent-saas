@@ -2,18 +2,24 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { streamText, tool } from "ai";
 import fetchTranscript from "@/tools/fetchTranscript";
 import { getVideoDetails } from "@/actions/getVideoDetails";
+import { generateImage } from "@/tools/generateImage";
+import { currentUser } from "@clerk/nextjs/server";
+import { z } from "zod";
+import { generateTitle } from "@/tools/generateTitle";
 
 const anthropic = createAnthropic({
   apiKey: process.env.CLAUDE_API_KEY,
-  // headers: {
-  //   "anthropic-beta": "token-efficient-tools-2025-02-19",
-  // },
+  headers: {
+    "anthropic-beta": "token-efficient-tools-2025-02-19",
+  },
 });
 
 const model = anthropic("claude-3-7-sonnet-20250219");
 
 export async function POST(req: Request) {
   const { messages, videoId } = await req.json();
+
+  const user = await currentUser();
 
   const videoDetails = await getVideoDetails(videoId);
 
@@ -24,6 +30,18 @@ export async function POST(req: Request) {
     messages: [{ role: "system", content: systemMessage }, ...messages],
     tools: {
       fetchTranscript,
+      generateImage: generateImage(videoId, user?.id || ""),
+      getVideoDetails: tool({
+        description: "Get the details of a Youtube video",
+        parameters: z.object({
+          videoId: z.string().describe("The video id to get the details of"),
+        }),
+        execute: async ({ videoId }) => {
+          const videoDetails = await getVideoDetails(videoId);
+          return { videoDetails };
+        },
+      }),
+      generateTitle: generateTitle(),
     },
   });
 

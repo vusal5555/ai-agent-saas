@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const generateImages = query({
   args: {
@@ -24,5 +24,50 @@ export const generateImages = query({
     );
 
     return imageUrls;
+  },
+});
+
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
+});
+
+// Store a new image URL for a video
+export const storeImage = mutation({
+  args: {
+    storageId: v.id("_storage"),
+    videoId: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Store the image URL in the database
+    const imageId = await ctx.db.insert("images", {
+      storgaId: args.storageId,
+      videoId: args.videoId,
+      userId: args.userId,
+    });
+
+    return imageId;
+  },
+});
+
+// Get images for a specific user and video combination
+export const getImage = query({
+  args: {
+    userId: v.string(),
+    videoId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const image = await ctx.db
+      .query("images")
+      .withIndex("by_user_and_video_id")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .filter((q) => q.eq(q.field("videoId"), args.videoId))
+      .first();
+
+    if (!image) {
+      return null;
+    }
+
+    return await ctx.storage.getUrl(image.storgaId);
   },
 });

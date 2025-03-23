@@ -1,6 +1,6 @@
 import React from "react";
 import SchematicEmbedd from "./SchematicEmbedd";
-import { getTemporaryAccessToken } from "@/app/actions/getTemporaryAccessToken";
+import { getTemporaryAccessToken } from "@/actions/getTemporaryAccessToken";
 
 const SchematicComponent = async ({ componentId }: { componentId: string }) => {
   if (!componentId) {

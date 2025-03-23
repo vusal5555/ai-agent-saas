@@ -7,7 +7,6 @@ import { api } from "@/convex/_generated/api";
 import { client } from "@/lib/schematic";
 import { FeatureFlag } from "@/features/flags";
 import { featureFlagEvents } from "@/features/flags";
-import { auth } from "@clerk/nextjs/server";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -48,6 +47,8 @@ async function fetchTranscript(videoId: string): Promise<TranscriptEntry[]> {
 }
 
 export async function getYoutubeTranscript(videoId: string) {
+  console.log(`🎬 Starting transcript fetch for video ID: ${videoId}`);
+
   const user = await currentUser();
   console.log(
     `👤 User authentication check: ${user?.id ? "Successful" : "Failed"}`
@@ -58,12 +59,14 @@ export async function getYoutubeTranscript(videoId: string) {
     throw new Error("User not found");
   }
 
+  console.log("🔍 Checking database for existing transcript...");
   const existingTranscript = await convex.query(
     api.transcript.getTranscriptByVideoId,
     { videoId, userId: user.id }
   );
 
   if (existingTranscript) {
+    console.log("✅ Found existing transcript in database");
     return {
       cache:
         "This video has already been transcribed - Accessing cached transcript instead of using a token",
@@ -71,15 +74,20 @@ export async function getYoutubeTranscript(videoId: string) {
     };
   }
 
+  console.log("🔄 No existing transcript found, fetching from YouTube...");
   try {
     const transcript = await fetchTranscript(videoId);
+    console.log("📝 Successfully fetched transcript from YouTube");
 
+    console.log("💾 Storing transcript in database...");
     await convex.mutation(api.transcript.storeTranscript, {
       videoId,
       userId: user.id,
       transcript,
     });
+    console.log("✅ Transcript stored successfully");
 
+    console.log("📊 Tracking transcription event...");
     await client.track({
       event: featureFlagEvents[FeatureFlag.TRANSCRIPTION].event,
       company: {
@@ -89,6 +97,7 @@ export async function getYoutubeTranscript(videoId: string) {
         id: user.id,
       },
     });
+    console.log("✅ Event tracked successfully");
 
     return {
       transcript,
@@ -96,6 +105,7 @@ export async function getYoutubeTranscript(videoId: string) {
         "This video was transcribed using a token, the transcript is now saved in the database",
     };
   } catch (error) {
+    console.error("❌ Error during transcript fetch:", error);
     return {
       transcript: [],
       cache: "Error fetching transcript, please try again later",
